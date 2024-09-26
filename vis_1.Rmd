@@ -5,6 +5,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggridges)
 ```
 
 Import the weather data
@@ -34,12 +35,12 @@ ggplot(weather_df, aes(x = tmin, y = tmax)) +
   geom_point()
 ```
 
-
 ```{r}
 weather_df |>
   ggplot(aes(x = tmin, y = tmax)) +
   geom_point()
 ```
+
 
 ```{r}
 ggp_weather_scatterplot = 
@@ -52,7 +53,7 @@ ggp_weather_scatterplot
 
 Check why some are missing 
 
-
+CHECK THE RECORDING 
 
 ##Fancier scatterplots! 
 
@@ -105,4 +106,133 @@ weather_df |>
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE)
 ```
+
+
+## Small things
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(aes(color = name), alpha = .3, size = .8) +
+  geom_smooth(se = FALSE)
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_hex()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, y = tmax)) + 
+  geom_point(color = "blue")
+```
+
+## Univariate plots 
+
+```{r}
+weather_df |>
+  ggplot(aes( x = tmin)) + 
+  geom_histogram()
+```
+
+```{r}
+weather_df |>
+  ggplot(aes( x = tmin, fill = name)) + 
+  geom_histogram(position = "dodge")
+```
+
+how would I fix this? maybe facet? 
+
+```{r}
+weather_df |>
+  ggplot(aes( x = tmin, fill = name)) + 
+  geom_histogram() + 
+  facet_grid(. ~ name)
+```
+
+maybe a density plot? 
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmin, fill = name)) + 
+  geom_density(alpha = 0.3)
+```
+
+```{r}
+weather_df |>
+  ggplot(aes(x = name, y = tmin, fill = name)) + 
+  geom_boxplot()
+```
+
+violin plots 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = name, y = tmin, fill = name)) + 
+  geom_violin()
+```
+
+ridge plot 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = tmin, y = name)) + 
+  geom_density_ridges()
+```
+
+LA precipiration across locations 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_density(alpha = 0.3) 
+
+weather_df |> 
+  ggplot(aes(x = prcp, y = name)) + 
+  geom_density_ridges() 
+
+weather_df |> 
+  ggplot(aes(x = name, y = prcp)) + 
+  geom_boxplot()
+
+weather_df |> 
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_histogram() + 
+  facet_grid(. ~ name)
+```
+
+```{r}
+weather_df |> 
+  filter(prcp > 10, prcp < 1000) |>
+  ggplot(aes(x = prcp, fill = name)) + 
+  geom_density(alpha = 0.3) 
+```
+
+
+
+## Saving and embedding plots 
+
+saving plots 
+
+```{r}
+ggp_weather = 
+  weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point()
+
+ggsave("plots/ggp_weather.pdf", ggp_weather, width = 8, height = 6)
+
+```
+
+embedding plots 
+
+```{r, fig.width = 6, fig.asp = 0.6}
+weather_df |> 
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point()
+
+```
+
 
