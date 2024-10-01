@@ -1,11 +1,12 @@
 ---
-title: "Vis I"
+title: "Vis II"
 output: github_document
 ---
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(ggridges)
+library(patchwork)
+library(haven)
 ```
 
 Import the weather data
@@ -26,213 +27,269 @@ weather_df =
     tmin = tmin / 10,
     tmax = tmax / 10) |>
   select(name, id, everything())
-```
 
-Making out first plot 
-
-```{r}
-ggplot(weather_df, aes(x = tmin, y = tmax)) + 
-  geom_point()
-```
-
-```{r}
-weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) +
-  geom_point()
+weather_df
 ```
 
 
-```{r}
-ggp_weather_scatterplot = 
-  weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) + 
-  geom_point()
-
-ggp_weather_scatterplot
-```
-
-Check why some are missing 
-
-CHECK THE RECORDING 
-
-##Fancier scatterplots! 
+Make a scatterplot but fancy this time. 
 
 ```{r}
-weather_df |>
+weather_df |> 
   ggplot(aes(x = tmin, y = tmax, color = name)) + 
-  geom_point(alpha = 0.3, size = 0.8) + 
-  geom_smooth(se = FALSE)
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature scatterplot", 
+    x = "Minimum Temp(C)",
+    y = "Maximum Temp (C)",
+    color = "Location",
+    caption = "Weather data taken from rnoaa package for three stations."
+  )
 ```
 
-Where you define aesthetics can matter
+
+Scales -- start with `x` and `y` and then do `color`.
 
 ```{r}
-weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) + 
-  geom_point(aes(color = name), alpha = 0.3, size = 0.8) + 
-  geom_smooth(se = FALSE)
-```
-
-use faceting real quick 
-
-```{r}
-weather_df |>
+weather_df |> 
   ggplot(aes(x = tmin, y = tmax, color = name)) + 
-  geom_point(alpha = 0.3) + 
-  geom_smooth(se = FALSE) + 
-  facet_grid(. ~ name)
-```
-
-Let's make a somewhat more interesting scatterplot 
-
-```{r}
-weather_df |>
-  ggplot(aes(x = date, y = tmax, color = name, size = prcp)) +
-  geom_point(alpha = 0.3) + 
-  geom_smooth(se = FALSE) + 
-  facet_grid(. ~ name)
-```
-
-Learning Assessment plot
-
-```{r}
-weather_df |> 
-  filter(name == "CentralPark_NY") |>
-  mutate(
-    tmax_fahr = tmax * (9/5) + 32,
-    tmin_fahr = tmin * (9/5) + 32
-  ) |>
-  ggplot(aes(x = tmin_fahr, y = tmax_fahr)) + 
-  geom_point() + 
-  geom_smooth(method = "lm", se = FALSE)
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature scatterplot", 
+    x = "Minimum Temp(C)",
+    y = "Maximum Temp (C)",
+    color = "Location",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) + 
+  scale_x_continuous(
+    breaks = c(-15, 0, 20), 
+    labels = c("-15C", "0","20")
+  ) + 
+  scale_y_continuous(
+    limits = c(0, 30),
+    transform = "sqrt"
+  )
 ```
 
 
-## Small things
-
-```{r}
-weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) + 
-  geom_point(aes(color = name), alpha = .3, size = .8) +
-  geom_smooth(se = FALSE)
-```
-
-```{r}
-weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) + 
-  geom_hex()
-```
-
-```{r}
-weather_df |>
-  ggplot(aes(x = tmin, y = tmax)) + 
-  geom_point(color = "blue")
-```
-
-## Univariate plots 
-
-```{r}
-weather_df |>
-  ggplot(aes( x = tmin)) + 
-  geom_histogram()
-```
-
-```{r}
-weather_df |>
-  ggplot(aes( x = tmin, fill = name)) + 
-  geom_histogram(position = "dodge")
-```
-
-how would I fix this? maybe facet? 
-
-```{r}
-weather_df |>
-  ggplot(aes( x = tmin, fill = name)) + 
-  geom_histogram() + 
-  facet_grid(. ~ name)
-```
-
-maybe a density plot? 
-
-```{r}
-weather_df |>
-  ggplot(aes(x = tmin, fill = name)) + 
-  geom_density(alpha = 0.3)
-```
-
-```{r}
-weather_df |>
-  ggplot(aes(x = name, y = tmin, fill = name)) + 
-  geom_boxplot()
-```
-
-violin plots 
+Look at color:
 
 ```{r}
 weather_df |> 
-  ggplot(aes(x = name, y = tmin, fill = name)) + 
-  geom_violin()
-```
-
-ridge plot 
-
-```{r}
-weather_df |> 
-  ggplot(aes(x = tmin, y = name)) + 
-  geom_density_ridges()
-```
-
-LA precipiration across locations 
-
-```{r}
-weather_df |> 
-  ggplot(aes(x = prcp, fill = name)) + 
-  geom_density(alpha = 0.3) 
-
-weather_df |> 
-  ggplot(aes(x = prcp, y = name)) + 
-  geom_density_ridges() 
-
-weather_df |> 
-  ggplot(aes(x = name, y = prcp)) + 
-  geom_boxplot()
-
-weather_df |> 
-  ggplot(aes(x = prcp, fill = name)) + 
-  geom_histogram() + 
-  facet_grid(. ~ name)
-```
-
-```{r}
-weather_df |> 
-  filter(prcp > 10, prcp < 1000) |>
-  ggplot(aes(x = prcp, fill = name)) + 
-  geom_density(alpha = 0.3) 
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature scatterplot", 
+    x = "Minimum Temp(C)",
+    y = "Maximum Temp (C)",
+    color = "Location",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) +
+  scale_color_hue(h =c(100, 400))+
+  viridis::scale_color_viridis(discrete = TRUE)
 ```
 
 
 
-## Saving and embedding plots 
-
-saving plots 
+## Themes 
 
 ```{r}
-ggp_weather = 
+ggp_scatterplot = 
   weather_df |> 
-  ggplot(aes(x = date, y = tmax, color = name)) + 
-  geom_point()
-
-ggsave("plots/ggp_weather.pdf", ggp_weather, width = 8, height = 6)
-
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature scatterplot", 
+    x = "Minimum Temp(C)",
+    y = "Maximum Temp (C)",
+    color = "Location",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) +
+  scale_color_hue(h =c(100, 400))+
+  viridis::scale_color_viridis(discrete = TRUE)
 ```
 
-embedding plots 
+```{r}
+ggp_scatterplot +
+  theme(legend.position = "bottom")
+```
 
-```{r, fig.width = 6, fig.asp = 0.6}
+```{r}
+ggp_scatterplot + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+Order matters ...
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_bw()
+```
+
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_minimal()
+```
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_classic()
+```
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  ggthemes::theme_excel()
+```
+
+
+## Learning Assessment 
+
+```{r}
 weather_df |> 
-  ggplot(aes(x = date, y = tmax, color = name)) + 
-  geom_point()
-
+  ggplot(aes(x = date, y = tmin, color = name, size = prcp)) + 
+  geom_point(alpha = .3) +
+  geom_smooth(se = FALSE) + 
+  viridis::scale_color_viridis(discrete = TRUE) +
+  labs(
+    title = "Seasonal variation in Min Temp", 
+    x = "Date",
+    y = "Minimum Temp(C)",
+    color = "Location",
+    size = "Precipitation",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) +
+  theme_minimal()
+  theme(legend.position = "bottom")
 ```
+
+
+
+Extra bonus stuff in `ggplot`
+
+Use different datasets in different `geom`s
+
+```{r}
+central_park_df = 
+  weather_df |>
+  filter(name == "CentralPark_NY")
+
+molokai_df = 
+  weather_df |>
+  filter(name == "Molokai_HI")
+
+molokai_df |>
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() +
+  geom_line(data = central_park_df)
+```
+
+
+
+
+## Multiple panels 
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density() + 
+  facet_grid(. ~ name)
+```
+
+
+```{r}
+ggp_tmax_tmin = 
+  weather_df |>
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = 0.3)
+
+ggp_tmax_density = 
+  weather_df |>
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density(alpha = 0.3)
+
+ggp_tmax_date = 
+  weather_df |>
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+(ggp_tmax_tmin + ggp_tmax_density) / ggp_tmax_date
+```
+
+
+
+## Data manipulation 
+
+```{r}
+weather_df |>
+  mutate(name = fct_relevel(name, c("Molokai_HI", "CentralPark_NY", "Waterhole_WA"))) |>
+  ggplot (aes(x = name, y = tmax, fill = name)) + 
+  geom_violin(alpha = .5)
+```
+
+
+
+
+PULSE data next. 
+
+```{r}
+pulse_df =
+  read_sas("./data/public_pulse_data.sas7bdat") |>
+  janitor::clean_names() |>
+  pivot_longer(
+    cols = bdi_score_bl:bdi_score_12m,
+    names_to = "visit",
+    values_to = "bdi_score",
+    names_prefix = "bdi_score_"
+    ) |>
+  mutate(visit = ifelse(visit == "bl", "00m", visit))
+
+pulse_df |>
+  ggplot(aes(x = visit, y = bdi_score)) + 
+  geom_boxplot()
+```
+
+
+
+Make an FAS plot 
+
+(Make a data plot with day 7 data for control, low and medium for when the ears unfold, pivot, walk and eyes open.)
+
+
+```{r}
+pups_df = 
+  read_csv("./data/FAS_pups.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  pivot_longer(
+    cols = c(pd_ears:pd_walk), 
+    names_to = "outcome", 
+    values_to = "pn_day", 
+    names_prefix = "pd_"
+  )
+
+litters_df = 
+  read_csv("./data/FAS_litters.csv", na = c("NA", ".", "")) |>
+  janitor::clean_names() |>
+  separate(group, into = c("dose", "tx_day"), 3)
+
+fas_df = 
+  left_join(pups_df, litters_df, by = "litter_number") 
+  
+fas_df |>
+  drop_na(tx_day) |>
+  ggplot(aes(x = dose, y = pn_day)) + 
+  geom_boxplot() + 
+  facet_grid(tx_day ~ outcome)
+```
+
+
+
+
 
 
