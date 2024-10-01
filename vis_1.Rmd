@@ -5,6 +5,7 @@ output: github_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(patchwork)
 ```
 
 Import the weather data
@@ -85,6 +86,139 @@ weather_df |>
   ) +
   scale_color_hue(h =c(100, 400))+
   viridis::scale_color_viridis(discrete = TRUE)
+```
+
+
+
+## Themes 
+
+```{r}
+ggp_scatterplot = 
+  weather_df |> 
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = .3) +
+  labs(
+    title = "Temperature scatterplot", 
+    x = "Minimum Temp(C)",
+    y = "Maximum Temp (C)",
+    color = "Location",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) +
+  scale_color_hue(h =c(100, 400))+
+  viridis::scale_color_viridis(discrete = TRUE)
+```
+
+```{r}
+ggp_scatterplot +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+ggp_scatterplot + 
+  theme_bw() +
+  theme(legend.position = "bottom")
+```
+
+Order matters ...
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_bw()
+```
+
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_minimal()
+```
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  theme_classic()
+```
+
+```{r}
+ggp_scatterplot + 
+  theme(legend.position = "bottom") +
+  ggthemes::theme_excel()
+```
+
+
+## Learning Assessment 
+
+```{r}
+weather_df |> 
+  ggplot(aes(x = date, y = tmin, color = name, size = prcp)) + 
+  geom_point(alpha = .3) +
+  geom_smooth(se = FALSE) + 
+  viridis::scale_color_viridis(discrete = TRUE) +
+  labs(
+    title = "Seasonal variation in Min Temp", 
+    x = "Date",
+    y = "Minimum Temp(C)",
+    color = "Location",
+    size = "Precipitation",
+    caption = "Weather data taken from rnoaa package for three stations."
+  ) +
+  theme_minimal()
+  theme(legend.position = "bottom")
+```
+
+
+
+Extra bonus stuff in `ggplot`
+
+Use different datasets in different `geom`s
+
+```{r}
+central_park_df = 
+  weather_df |>
+  filter(name == "CentralPark_NY")
+
+molokai_df = 
+  weather_df |>
+  filter(name == "Molokai_HI")
+
+molokai_df |>
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() +
+  geom_line(data = central_park_df)
+```
+
+
+
+
+## Multiple panels 
+
+```{r}
+weather_df |>
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density() + 
+  facet_grid(. ~ name)
+```
+
+
+```{r}
+ggp_tmax_tmin = 
+  weather_df |>
+  ggplot(aes(x = tmin, y = tmax, color = name)) + 
+  geom_point(alpha = 0.3)
+
+ggp_tmax_density = 
+  weather_df |>
+  ggplot(aes(x = tmax, fill = name)) + 
+  geom_density(alpha = 0.3)
+
+ggp_tmax_date = 
+  weather_df |>
+  ggplot(aes(x = date, y = tmax, color = name)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+
+(ggp_tmax_tmin + ggp_tmax_density) / ggp_tmax_date
 ```
 
 
